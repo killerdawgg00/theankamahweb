@@ -11,6 +11,7 @@ import {
   ArrowUpRight,
   Code2,
   Database,
+  GitBranch,
   Camera,
   BriefcaseBusiness,
   Mail,
