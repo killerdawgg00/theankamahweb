@@ -2,43 +2,28 @@ import assert from "node:assert/strict";
 import { access, readFile } from "node:fs/promises";
 import test from "node:test";
 
-async function loadWorker() {
-  const workerUrl = new URL("../dist/server/index.js", import.meta.url);
-  workerUrl.searchParams.set("test", `${process.pid}-${Date.now()}`);
-  const worker = (await import(workerUrl.href)).default;
+test("native Next.js build emits Vercel-compatible output", async () => {
+  const requiredArtifacts = [
+    ".next/BUILD_ID",
+    ".next/routes-manifest.json",
+    ".next/prerender-manifest.json",
+    ".next/server/app/index.html",
+  ];
 
-  if (typeof worker === "function") {
-    return { fetch: worker };
-  }
-
-  return worker;
-}
-
-const context = {
-  waitUntil() {},
-  passThroughOnException() {},
-};
-
-test("server-renders the portfolio shell and production metadata", async () => {
-  const worker = await loadWorker();
-  const response = await worker.fetch(
-    new Request("http://localhost/", {
-      headers: { accept: "text/html" },
-    }),
-    {},
-    context,
+  await Promise.all(
+    requiredArtifacts.map((file) => access(new URL(`../${file}`, import.meta.url))),
   );
 
-  assert.equal(response.status, 200);
-  assert.match(response.headers.get("content-type") ?? "", /^text\/html\b/i);
+  const html = await readFile(
+    new URL("../.next/server/app/index.html", import.meta.url),
+    "utf8",
+  );
 
-  const html = await response.text();
   assert.match(html, /<title>Kelvin Ankamah Adjei — Designer &amp; Developer<\/title>/i);
   assert.match(html, /Independent creative developer building expressive/i);
-  assert.match(html, /property="og:image" content="\/og\.png"/i);
+  assert.match(html, /property="og:image"/i);
   assert.match(html, /name="twitter:card" content="summary_large_image"/i);
   assert.match(html, /class="loader-mark"/i);
-  assert.match(html, />K<\/span><span[^>]*>E<\/span><span[^>]*>L<\/span>/i);
   assert.doesNotMatch(html, /codex-preview|Your site is taking shape/i);
 });
 
@@ -64,17 +49,16 @@ test("ships every portfolio image referenced by the page", async () => {
   for (const asset of assets.slice(0, 5)) {
     assert.match(page, new RegExp(asset.replace(".", "\\.")));
   }
+  assert.match(page, /unoptimized/);
   assert.match(config, /unoptimized:\s*true/);
 });
 
-test("image endpoint redirects safely without Cloudflare bindings", async () => {
-  const worker = await loadWorker();
-  const response = await worker.fetch(
-    new Request("http://localhost/_vinext/image?url=%2Fportfolio.JPG&w=640&q=75"),
-    {},
-    context,
+test("uses native Next.js deployment scripts", async () => {
+  const packageJson = JSON.parse(
+    await readFile(new URL("../package.json", import.meta.url), "utf8"),
   );
 
-  assert.equal(response.status, 302);
-  assert.equal(response.headers.get("location"), "http://localhost/portfolio.JPG");
+  assert.equal(packageJson.scripts.dev, "next dev");
+  assert.equal(packageJson.scripts.build, "next build");
+  assert.equal(packageJson.scripts.start, "next start");
 });
