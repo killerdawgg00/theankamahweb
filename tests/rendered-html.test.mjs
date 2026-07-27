@@ -5,7 +5,13 @@ import test from "node:test";
 async function loadWorker() {
   const workerUrl = new URL("../dist/server/index.js", import.meta.url);
   workerUrl.searchParams.set("test", `${process.pid}-${Date.now()}`);
-  return (await import(workerUrl.href)).default;
+  const worker = (await import(workerUrl.href)).default;
+
+  if (typeof worker === "function") {
+    return { fetch: worker };
+  }
+
+  return worker;
 }
 
 const context = {
@@ -61,7 +67,7 @@ test("ships every portfolio image referenced by the page", async () => {
   assert.match(config, /unoptimized:\s*true/);
 });
 
-test("image endpoint fails safely without Cloudflare bindings", async () => {
+test("image endpoint redirects safely without Cloudflare bindings", async () => {
   const worker = await loadWorker();
   const response = await worker.fetch(
     new Request("http://localhost/_vinext/image?url=%2Fportfolio.JPG&w=640&q=75"),
@@ -69,7 +75,6 @@ test("image endpoint fails safely without Cloudflare bindings", async () => {
     context,
   );
 
-  assert.equal(response.status, 404);
-  assert.equal(response.headers.get("cache-control"), "no-store");
-  assert.equal(await response.text(), "Image optimization is unavailable");
+  assert.equal(response.status, 302);
+  assert.equal(response.headers.get("location"), "http://localhost/portfolio.JPG");
 });
