@@ -1,7 +1,6 @@
 import handler from "vinext/server/app-router-entry";
 
-interface Env {
-}
+type Env = Record<string, never>;
 
 interface ExecutionContext {
   waitUntil(promise: Promise<unknown>): void;
@@ -19,10 +18,15 @@ const worker = {
     const url = new URL(request.url);
 
     if (url.pathname === "/_vinext/image") {
-      return new Response("Image optimization is unavailable", {
-        status: 404,
-        headers: { "Cache-Control": "no-store" },
-      });
+      const source = url.searchParams.get("url");
+
+      // Stale pages may still request the old optimizer route. Redirect only
+      // safe, site-local paths to their bundled originals.
+      if (source?.startsWith("/") && !source.startsWith("//")) {
+        return Response.redirect(new URL(source, url.origin), 302);
+      }
+
+      return new Response("Invalid image source", { status: 400 });
     }
 
     return handler.fetch(request, env, ctx);
