@@ -319,7 +319,7 @@ export default function Home() {
           <Sparkles size={22} />
           <p>Have a project in mind?</p>
           <h2>Let&apos;s make it<br /><em>move.</em></h2>
-          <a className="button button-primary" href="mailto:hello@kelvin.dev">Start a conversation <ArrowUpRight size={18} /></a>
+          <a className="button button-primary" href="mailto:keladjei515@yahoo.com">Start a conversation <ArrowUpRight size={18} /></a>
         </section>
       </main>
 
