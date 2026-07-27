@@ -222,7 +222,14 @@ export default function Home() {
           <div className="hero-glow" />
           <p className="eyebrow hero-eyebrow">Independent creative developer <span>Accra, GH</span></p>
           <div ref={portrait} className="portrait">
-            <Image src="/portfolio.JPG" alt="Kelvin Ankamah Adjei" fill priority sizes="(max-width: 680px) 230px, (max-width: 1200px) 25vw, 350px" />
+            <Image
+              src="/portfolio.JPG"
+              alt="Kelvin Ankamah Adjei"
+              fill
+              priority
+              unoptimized
+              sizes="(max-width: 680px) 230px, (max-width: 1200px) 25vw, 350px"
+            />
             <div className="portrait-light" />
             <span className="portrait-id">KA—001</span>
           </div>
@@ -286,6 +293,7 @@ export default function Home() {
                     src={project.image}
                     alt={`${project.title} website preview`}
                     fill
+                    unoptimized
                     sizes="(max-width: 900px) 100vw, 62vw"
                   />
                   <span className="project-index">{project.number}</span>
