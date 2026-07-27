@@ -79,11 +79,9 @@ const projects = [
 ];
 
 const socials = [
-  { label: "GitHub", icon: GitBranch, href: "https://github.com/" },
-  { label: "LinkedIn", icon: BriefcaseBusiness, href: "https://linkedin.com/" },
-  { label: "Email", icon: Mail, href: "mailto:hello@kelvin.dev" },
-  { label: "X", icon: X, href: "https://x.com/" },
-  { label: "Instagram", icon: Camera, href: "https://instagram.com/" },
+  { label: "GitHub", icon: GitBranch, href: "https://github.com/killerdawgg00" },
+  { label: "LinkedIn", icon: BriefcaseBusiness, href: "https://linkedin.com/kelvinaadjei02" },
+  { label: "Email", icon: Mail, href: "mailto:keladjei515@yahoo.com" }
 ];
 
 function Loader({ onDone }: { onDone: () => void }) {
